@@ -29,18 +29,28 @@ namespace CustomerGrpc
 			}
 		}
 
-        public static void TestConnection()
+        private static async void TestConnection()
         {
 			//metodo utilizado para comprobar la conexi�n
             using (NpgsqlConnection con = GetConnection())
             {
 				//momento en el que nos comectamos
                 con.Open();
-                if (con.State == ConnectionState.Open)
-                {
+				if (con.State == ConnectionState.Open)
+				{
 					// HACER TRUNCATE
-                    Console.WriteLine("Conexi�n con la base de datos exitosa");
-                }
+					Console.WriteLine("Conexi�n con la base de datos exitosa");
+					using (var tx = con.BeginTransaction())
+					{
+						using (var cmd = new NpgsqlCommand())
+						{
+							cmd.Connection = con;
+                            cmd.CommandText = "TRUNCATE public.\"calculos\"";
+                            await cmd.ExecuteNonQueryAsync();
+                        }
+                        tx.Commit();
+					}
+				}
 				else
 				{
 					Console.WriteLine("No se ha podido conectar a la base de datos");
@@ -51,7 +61,7 @@ namespace CustomerGrpc
         private static NpgsqlConnection GetConnection()
         {
 			//metodo de npgsql para conectarnos a la base de datos, retornamos la conexi�n
-            return new NpgsqlConnection(@"Server=localhost;Port=5432;User Id=postgres;Password=;Database=proyectoSO");
+            return new NpgsqlConnection(@"Server=localhost;Port=5432;User Id=postgres;Password=admin;Database=proyectoSO");
         }
 
         // Additional configuration is required to successfully run gRPC on macOS.
