@@ -1,0 +1,3 @@
+is_global = true
+build_property.RootNamespace = gRPC_Server
+build_property.ProjectDir = C:\GitHub\RPC_project\gRPC_Server\gRPC_Server\

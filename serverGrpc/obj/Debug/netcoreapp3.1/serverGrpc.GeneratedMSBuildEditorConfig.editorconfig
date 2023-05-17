@@ -1,0 +1,3 @@
+is_global = true
+build_property.RootNamespace = serverGrpc
+build_property.ProjectDir = C:\Users\Usuario\source\repos\serverGrpc\serverGrpc\

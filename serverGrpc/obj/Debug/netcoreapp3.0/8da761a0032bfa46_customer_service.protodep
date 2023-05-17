@@ -1,0 +1,2 @@
+obj\Debug\netcoreapp3.0/CustomerService.cs \
+obj\Debug\netcoreapp3.0/CustomerServiceGrpc.cs: ../Protos/customer_service.proto
