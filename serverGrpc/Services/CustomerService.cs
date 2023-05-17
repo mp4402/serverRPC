@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
-
+using Npgsql;
 
 namespace CustomerGrpc.Services
 {
@@ -21,6 +21,7 @@ namespace CustomerGrpc.Services
 
 		public override async Task<JoinCustomerReply> JoinCustomerChat(JoinCustomerRequest request, ServerCallContext context)
 		{
+			Program.TestConnection();
 			return new JoinCustomerReply { RoomId = await _chatRoomService.AddCustomerToChatRoomAsync(request.Customer) };
 		}
 
@@ -47,11 +48,22 @@ namespace CustomerGrpc.Services
 					{
 						if (string.Equals(requestStream.Current.Message.ToLower(), "quit", StringComparison.OrdinalIgnoreCase))
 						{
+							_logger.LogInformation("Prueba de conexion!");
+							var con = new NpgsqlConnection(connectionString: @"Server=localhost;Port=5432;User Id=postgres;Password=;Database=proyectoSO");
+							con.Open();
+							if (con.State == ConnectionState.Open)
+							{
+								Console.WriteLine("Conexiï¿½n con la base de datos exitosa, desde sendmessage");
+							}
+							else
+							{
+								Console.WriteLine("No se ha podido conectar a la base de datos, desde sendmessage");
+							}
                             _chatRoomService.DisconnectCustomer(requestStream.Current.RoomId, Guid.Parse(requestStream.Current.CustomerId));
 							break;
                         }
-                        //posible invocación de funciones de cálculo estadístico y lectura/escritura de la base de datos aquí
-                        //área crítica
+                        //posible invocaciï¿½n de funciones de cï¿½lculo estadï¿½stico y lectura/escritura de la base de datos aquï¿½
+                        //ï¿½rea crï¿½tica
                         await _chatRoomService.BroadcastMessageAsync(requestStream.Current);
 					}
 				}
