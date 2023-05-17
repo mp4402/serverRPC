@@ -38,6 +38,7 @@ namespace CustomerGrpc
                 con.Open();
                 if (con.State == ConnectionState.Open)
                 {
+					// HACER TRUNCATE
                     Console.WriteLine("Conexi�n con la base de datos exitosa");
                 }
 				else
@@ -62,6 +63,7 @@ namespace CustomerGrpc
 					webBuilder.ConfigureKestrel(options =>
 					{
 						// Setup a HTTP/2 endpoint without TLS for OSX.
+						//ThreadPool.SetMaxThreads(1,0);
 						options.ListenLocalhost(Int32.Parse(args[0]), o => o.Protocols = HttpProtocols.Http2);
 					});
 					webBuilder.UseStartup<Startup>();

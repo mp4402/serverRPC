@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using CustomerGrpc.Providers;
 using Grpc.Core;
 using Microsoft.AspNetCore.Localization;
+using Npgsql;
+using System.Data;
 
 namespace CustomerGrpc.Services
 {
@@ -16,50 +18,22 @@ namespace CustomerGrpc.Services
 			_chatRoomProvider = chatRoomProvider;
 		}
 		
+
+
 		public async Task BroadcastMessageAsync(ChatMessage message)
 		{
-            //Modificar entrega del mensaje para retornar unicamente al cliente y que incluya el resultado de la operación
-            var banderaEscrito = false;
+			//Modificar entrega del mensaje para retornar unicamente al cliente y que incluya el resultado de la operaciï¿½n
 			var chatRoom = _chatRoomProvider.GetChatRoomById(message.RoomId);
-			//ya no hay que escribir al otro cliente, unicamente al que hace el request
-			//posible invocación de funciones de cálculo estadístico y lectura/escritura de la base de datos aquí
-			//área crítica
 			foreach (var customer in chatRoom.CustomersInRoom)
 			{
-				if (message.CustomerDest.Equals(customer.Name))
+				if (message.CustomerName.Equals(customer.Name))
 				{
+					// select del valor. 
 					await customer.Stream.WriteAsync(message);
-                    Console.WriteLine($"Sent message from {message.CustomerName} to {customer.Name}");
-					banderaEscrito = true;
+					Console.WriteLine($"Sent message from {message.CustomerName} to {customer.Name}");
 					break;
-                }
-            } 
-			if (banderaEscrito)
-			{
-                foreach (var customer in chatRoom.CustomersInRoom)
-				{
-					if (message.CustomerName.Equals(customer.Name))
-					{
-						await customer.Stream.WriteAsync(message);
-						Console.WriteLine($"Sent message from {message.CustomerName} to {customer.Name}");
-						break;
-					}
 				}
-
-            }
-			else 
-			{
-                foreach (var customer in chatRoom.CustomersInRoom)
-                {
-                    if (message.CustomerName.Equals(customer.Name))
-                    {
-						message.Message = "No existe el usuario " + message.CustomerDest;
-                        await customer.Stream.WriteAsync(message);
-                        Console.WriteLine($"Sent invalid message");
-                        break;
-                    }
-                }
-            }
+			}
         }
 
 		public Task<int> AddCustomerToChatRoomAsync(Customer customer)
