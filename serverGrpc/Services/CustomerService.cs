@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Diagnostics;
 using System.Linq;
+using System.Drawing.Printing;
 
 namespace CustomerGrpc.Services
 {
@@ -98,29 +99,34 @@ namespace CustomerGrpc.Services
 								using (var cmd = new NpgsqlCommand())
 								{
 									cmd.Connection = con;
-									cmd.CommandText = $"SELECT * FROM public.calculos WHERE file='{message.Message}'";
+									cmd.CommandText = $"SELECT * FROM public.\"calculos\" WHERE file='{message.Message}'";
 									NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
 									var result = new List<double>();
 
-									try
+									while (await reader.ReadAsync())
 									{
-										result.Add((double)reader[0]);
-										result.Add((double)reader[1]);
-										result.Add((double)reader[2]);
-										result.Add((double)reader[3]);
-										result.Add((double)reader[4]);
-										result.Add((double)reader[5]);
-										for (int i = 0; i < result.Count; i++)
-										{
-											Console.WriteLine(result[i]);
-										}
-										bandera = true; // si existe la fila entera
+										Console.WriteLine(reader[0]);
+										result.Add(Convert.ToDouble(reader[0]));
+										result.Add(Convert.ToDouble(reader[1]));
+										result.Add(Convert.ToDouble(reader[2]));
+										result.Add(Convert.ToDouble(reader[3]));
+										result.Add(Convert.ToDouble(reader[4]));
+										result.Add(Convert.ToDouble(reader[5]));
 									}
-									catch (Exception)
+									//Console.WriteLine(result.Count());
+									if (result.Count() > 0)
 									{
-										Console.WriteLine("No hay datos con ese file de id. ");
-										bandera = false; // No existe la fila entera, se hace insert. 
+										bandera = true;
 									}
+									else 
+									{
+										bandera = false;
+									}
+									for (int i = 0; i < result.Count(); i++)
+									{
+										Console.WriteLine(result[i]);
+									}
+										// si existe la fila entera
 								}
 							}
 						}
@@ -139,8 +145,9 @@ namespace CustomerGrpc.Services
 								{
 									using (var cmd = new NpgsqlCommand())
 									{
+										cmd.Connection = con;
 										cmd.CommandText = $"UPDATE public.\"calculos\"" +
-										$" 	SET \"functionProcessed\"=\"functionProcessed\" + 1, \"'{message.FunctionProcess}'\"='{result_hilo}'" +
+										$" 	SET \"functionsProcessed\"=\"functionsProcessed\" + 1, \"{message.FunctionProcess}Value\"='{result_hilo}'" +
 										$" WHERE file = {message.Message}";
 										await cmd.ExecuteNonQueryAsync();
 									}
