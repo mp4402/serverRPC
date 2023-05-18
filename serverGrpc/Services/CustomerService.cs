@@ -16,6 +16,9 @@ namespace CustomerGrpc.Services
 {
 	public class CustomerService : CustomerGrpc.CustomerService.CustomerServiceBase
 	{
+		Semaphore _gate = new Semaphore(0, 1);
+
+		Semaphore _hilos = new Semaphore(0, Program.set_hilos_limit());
 
 		private readonly ILogger<CustomerService> _logger;
 		private readonly IChatRoomService _chatRoomService;
@@ -25,13 +28,15 @@ namespace CustomerGrpc.Services
 		{
 			_logger = logger;
 			_chatRoomService = chatRoomService;
+			_gate.Release(1);
+			_hilos.Release(Program.set_hilos_limit());
 		}
 
 		public override async Task<JoinCustomerReply> JoinCustomerChat(JoinCustomerRequest request, ServerCallContext context)
 		{
 			return new JoinCustomerReply { RoomId = await _chatRoomService.AddCustomerToChatRoomAsync(request.Customer) };
 		}
-		 static double readFile(string path, string function){
+		static double readFile(string path, string function){
             List<int> Open = new List<int>();
             using(var reader = new StreamReader(@path))
             {
@@ -83,14 +88,61 @@ namespace CustomerGrpc.Services
 				Console.WriteLine(a);
 			}
             Console.WriteLine("Conexi�n con la base de datos exitosa, desde sendmessage");
-                Boolean bandera = false; // No existe la fila entera, se hace insert.
-                                            //posible invocaci�n de funciones de c�lculo estad�stico y lectura/escritura de la base de datos aqu�
+                Boolean bandera = false; 
                 string path = Environment.CurrentDirectory + @"/so_data/index_data_" + message.Message + ".csv";
 				double result_hilo = readFile(path, message.FunctionProcess);
-				//�rea cr�tica
-                    //.. do som database stuff ..
-                    using (var con = new NpgsqlConnection(connectionString: @"Server=localhost;Port=5432;User Id=postgres;Password=admin;Database=proyectoSO"))
-                    {
+				//Area critica
+				_gate.WaitOne();
+				using (var con = new NpgsqlConnection(connectionString: @"Server=localhost;Port=5432;User Id=postgres;Password=admin;Database=proyectoSO"))
+				{
+					con.Open();
+					if (con.State == ConnectionState.Open)
+					{
+						using (var tx = con.BeginTransaction())
+						{
+							using (var cmd = new NpgsqlCommand())
+							{
+								cmd.Connection = con;
+								cmd.CommandText = $"SELECT * FROM public.\"calculos\" WHERE file='{message.Message}'";
+								NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
+								var result = new List<double>();
+
+								while (await reader.ReadAsync())
+								{
+									Console.WriteLine(reader[0]);
+									result.Add(Convert.ToDouble(reader[0]));
+									result.Add(Convert.ToDouble(reader[1]));
+									result.Add(Convert.ToDouble(reader[2]));
+									result.Add(Convert.ToDouble(reader[3]));
+									result.Add(Convert.ToDouble(reader[4]));
+									result.Add(Convert.ToDouble(reader[5]));
+								}
+								//Console.WriteLine(result.Count());
+								if (result.Count() > 0)
+								{
+									bandera = true;
+								}
+								else 
+								{
+									bandera = false;
+								}
+								/*for (int i = 0; i < result.Count(); i++)
+								{
+									Console.WriteLine(result[i]);
+								}*/
+									// si existe la fila entera
+							}
+						}
+
+					}
+					else
+					{
+						Console.WriteLine("No se ha podido conectar a la base de datos, desde SELECT");
+					}
+				}
+				if (bandera){
+					using (var con = new NpgsqlConnection(connectionString: @"Server=localhost;Port=5432;User Id=postgres;Password=admin;Database=proyectoSO"))
+					{
 						con.Open();
 						if (con.State == ConnectionState.Open)
 						{
@@ -99,100 +151,58 @@ namespace CustomerGrpc.Services
 								using (var cmd = new NpgsqlCommand())
 								{
 									cmd.Connection = con;
-									cmd.CommandText = $"SELECT * FROM public.\"calculos\" WHERE file='{message.Message}'";
-									NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
-									var result = new List<double>();
-
-									while (await reader.ReadAsync())
-									{
-										Console.WriteLine(reader[0]);
-										result.Add(Convert.ToDouble(reader[0]));
-										result.Add(Convert.ToDouble(reader[1]));
-										result.Add(Convert.ToDouble(reader[2]));
-										result.Add(Convert.ToDouble(reader[3]));
-										result.Add(Convert.ToDouble(reader[4]));
-										result.Add(Convert.ToDouble(reader[5]));
-									}
-									//Console.WriteLine(result.Count());
-									if (result.Count() > 0)
-									{
-										bandera = true;
-									}
-									else 
-									{
-										bandera = false;
-									}
-									for (int i = 0; i < result.Count(); i++)
-									{
-										Console.WriteLine(result[i]);
-									}
-										// si existe la fila entera
+									cmd.CommandText = $"UPDATE public.\"calculos\"" +
+									$" 	SET \"functionsProcessed\"=\"functionsProcessed\" + 1, \"{message.FunctionProcess}Value\"='{result_hilo}'" +
+									$" WHERE file = {message.Message}";
+									await cmd.ExecuteNonQueryAsync();
 								}
+								tx.Commit();
 							}
+							
 						}
 						else
 						{
-							Console.WriteLine("No se ha podido conectar a la base de datos, desde SELECT");
+							Console.WriteLine("No se ha podido conectar a la base de datos, desde UPDATE");
 						}
 					}
-					if (bandera){
-						using (var con = new NpgsqlConnection(connectionString: @"Server=localhost;Port=5432;User Id=postgres;Password=admin;Database=proyectoSO"))
-						{
-							con.Open();
-							if (con.State == ConnectionState.Open)
-							{
-								using (var tx = con.BeginTransaction())
-								{
-									using (var cmd = new NpgsqlCommand())
-									{
-										cmd.Connection = con;
-										cmd.CommandText = $"UPDATE public.\"calculos\"" +
-										$" 	SET \"functionsProcessed\"=\"functionsProcessed\" + 1, \"{message.FunctionProcess}Value\"='{result_hilo}'" +
-										$" WHERE file = {message.Message}";
-										await cmd.ExecuteNonQueryAsync();
-									}
-									tx.Commit();
-								}
-							}
-							else
-							{
-								Console.WriteLine("No se ha podido conectar a la base de datos, desde UPDATE");
-							}
-						}
 
-					}
-					else{
-				// insert 
-						using (var con = new NpgsqlConnection(connectionString: @"Server=localhost;Port=5432;User Id=postgres;Password=admin;Database=proyectoSO"))
+				}
+				else{
+			// insert 
+					using (var con = new NpgsqlConnection(connectionString: @"Server=localhost;Port=5432;User Id=postgres;Password=admin;Database=proyectoSO"))
+					{
+						con.Open();
+						if (con.State == ConnectionState.Open)
 						{
-							con.Open();
-							if (con.State == ConnectionState.Open)
+							using (var tx = con.BeginTransaction())
 							{
-								using (var tx = con.BeginTransaction())
+								using (var cmd = new NpgsqlCommand())
 								{
-									using (var cmd = new NpgsqlCommand())
-									{
-										cmd.Connection = con;
-										var no_file = Convert.ToInt32(message.Message);
-										cmd.CommandText = $"INSERT INTO public.\"calculos\" (\"file\", \"{message.FunctionProcess.Trim()}Value\", \"functionsProcessed\") VALUES (@file, @function, @functionProcessed);";
-										cmd.Parameters.AddWithValue("file", no_file);
-										cmd.Parameters.AddWithValue("function", result_hilo);
-										cmd.Parameters.AddWithValue("functionProcessed", 1);
-										await cmd.ExecuteNonQueryAsync();
-									}
-									tx.Commit();
+									cmd.Connection = con;
+									var no_file = Convert.ToInt32(message.Message);
+									cmd.CommandText = $"INSERT INTO public.\"calculos\" (\"file\", \"{message.FunctionProcess.Trim()}Value\", \"functionsProcessed\") VALUES (@file, @function, @functionProcessed);";
+									cmd.Parameters.AddWithValue("file", no_file);
+									cmd.Parameters.AddWithValue("function", result_hilo);
+									cmd.Parameters.AddWithValue("functionProcessed", 1);
+									await cmd.ExecuteNonQueryAsync();
 								}
+								tx.Commit();
 							}
-							else
-							{
-								Console.WriteLine("No se ha podido conectar a la base de datos, desde UPDATE");
-							}
+							
+						}
+						else
+						{
+							Console.WriteLine("No se ha podido conectar a la base de datos, desde UPDATE");
 						}
 					}
+				}
 				// fin área crítica
+				_gate.Release();
 				// cambiar el message respuesta. 
 				message.Respuesta = result_hilo.ToString();
 				await _chatRoomService.BroadcastMessageAsync(message);
+				// libera semaforo de hilos. 
+				_hilos.Release();
         }
 
         public override async Task SendMessageToChatRoom(IAsyncStreamReader<ChatMessage> requestStream, IServerStreamWriter<ChatMessage> responseStream,
@@ -228,7 +238,10 @@ namespace CustomerGrpc.Services
 							// leer el archivo, y calcular lo solicitado. 
 							// 
 						//await _chatRoomService.BroadcastMessageAsync(requestStream.Current); // esta se hace en el thread. 
+						// semaphoro de hilos
+						_hilos.WaitOne();
 						ThreadPool.QueueUserWorkItem(EjecutarTarea, requestStream.Current);
+						
 					}
 				}
 			}

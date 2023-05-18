@@ -7,13 +7,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Hosting;
+using System.Threading;
 using Npgsql;
 
 namespace CustomerGrpc
 {
 	public class Program
 	{
-
+		public static int hilos;
+		
 		//Modificacion de parametros a recibir, creacion de hilos segun args[1]
 		public static void Main(string[] args)
 		{
@@ -21,14 +23,24 @@ namespace CustomerGrpc
 			{
 				//Conexi�n con la base de datos
                 TestConnection();
+				hilos = Convert.ToInt32(args[1]);
+				ThreadPool.SetMaxThreads(hilos,10);
+				int maxThreads;
+            	int comp1;
+				ThreadPool.GetMaxThreads(out maxThreads, out comp1);
+            	Console.WriteLine("The max number of threads: {0}", maxThreads);
+				Console.WriteLine("The number of processors on this computer is {0}.", Environment.ProcessorCount);
                 CreateHostBuilder(args).Build().Run();
             }
 			catch (Exception)
 			{
-				Console.WriteLine("Puerto no valido / conexion erronea");
+				Console.WriteLine("Puerto no valido / conexion errone. O debe agregar numero de hilos");
 			}
 		}
 
+		public static int set_hilos_limit(){
+			return hilos;
+		}
         private static async void TestConnection()
         {
 			//metodo utilizado para comprobar la conexi�n
