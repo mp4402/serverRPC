@@ -38,43 +38,51 @@ namespace CustomerGrpc.Services
 		}
 		static double readFile(string path, string function){
             List<int> Open = new List<int>();
-            using(var reader = new StreamReader(@path))
-            {
-                int countLines = 0;
-                while (!reader.EndOfStream)
-                {
-                    countLines = countLines + 1; 
-                    var line = reader.ReadLine();
-                    var values = line.Split(',');
-                    if (countLines > 1){
-                        int openValue = Convert.ToInt32(values[1]); // solo este interesa\
-                        Open.Add(openValue);
-                    }
-                }
-            }
-			double avgOpen = Math.Round(Open.Average(),2);
-			double respuesta_file = 0;
-            switch(function){
-				case "std":
-						respuesta_file =  Math.Round(Math.Sqrt(Open.Average(v=>Math.Pow(v-avgOpen,2))),2);
+			try{
+				using(var reader = new StreamReader(@path))
+				{
+					int countLines = 0;
+					while (!reader.EndOfStream)
+					{
+						countLines = countLines + 1; 
+						var line = reader.ReadLine();
+						var values = line.Split(',');
+						if (countLines > 1){
+							int openValue = Convert.ToInt32(values[1]); // solo este interesa\
+							Open.Add(openValue);
+						}
+					}
+				}
+				double avgOpen = Math.Round(Open.Average(),2);
+				double respuesta_file = 0;
+				switch(function){
+					case "std":
+							respuesta_file =  Math.Round(Math.Sqrt(Open.Average(v=>Math.Pow(v-avgOpen,2))),2);
 
-					break;
-				case "min":
-						respuesta_file = Open.Min();
-					break;
-				case "max":
-						respuesta_file = Open.Max();
-					break;
-				case "mean":
-						respuesta_file = avgOpen;
-					break;
-				case "count":
-						respuesta_file = Open.Count();
-					break;
-				default:
-					break;
+						break;
+					case "min":
+							respuesta_file = Open.Min();
+						break;
+					case "max":
+							respuesta_file = Open.Max();
+						break;
+					case "mean":
+							respuesta_file = avgOpen;
+						break;
+					case "count":
+							respuesta_file = Open.Count();
+						break;
+					default:
+						break;
+				}
+				return respuesta_file;
+
 			}
-			return respuesta_file;
+			catch(Exception){
+				Console.WriteLine("ERROR EN EL ARCHIVO!");
+				return -1;
+			}
+            
             
         }
         public async void EjecutarTarea(Object valor)
@@ -88,11 +96,15 @@ namespace CustomerGrpc.Services
 				Console.WriteLine(a);
 			}
             Console.WriteLine("Conexi�n con la base de datos exitosa, desde sendmessage");
-                Boolean bandera = false; 
-                string path = Environment.CurrentDirectory + @"/so_data/index_data_" + message.Message + ".csv";
-				double result_hilo = readFile(path, message.FunctionProcess);
-				//Area critica
-				_gate.WaitOne();
+			Boolean bandera = false; 
+			string path = Environment.CurrentDirectory + @"/so_data/index_data_" + message.Message + ".csv";
+			double result_hilo = readFile(path, message.FunctionProcess);
+			//Area critica
+			_gate.WaitOne();
+			if (result_hilo == -1){
+				message.Respuesta = "Archivo no existe";
+			}
+			else{
 				using (var con = new NpgsqlConnection(connectionString: @"Server=localhost;Port=5432;User Id=postgres;Password=admin;Database=proyectoSO"))
 				{
 					con.Open();
@@ -196,13 +208,14 @@ namespace CustomerGrpc.Services
 						}
 					}
 				}
-				// fin área crítica
-				_gate.Release();
-				// cambiar el message respuesta. 
+				// cambiar el message respuesta.
 				message.Respuesta = result_hilo.ToString();
-				await _chatRoomService.BroadcastMessageAsync(message);
-				// libera semaforo de hilos. 
-				_hilos.Release();
+			}
+			// fin área crítica
+			_gate.Release();
+			await _chatRoomService.BroadcastMessageAsync(message);
+			// libera semaforo de hilos. 
+			_hilos.Release();
         }
 
         public override async Task SendMessageToChatRoom(IAsyncStreamReader<ChatMessage> requestStream, IServerStreamWriter<ChatMessage> responseStream,

@@ -28,22 +28,22 @@ namespace CustomerGrpc {
             "dG9tZXJSZXF1ZXN0EigKCGN1c3RvbWVyGAEgASgLMhYuQ3VzdG9tZXJHcnBj",
             "LkN1c3RvbWVyIiQKEUpvaW5DdXN0b21lclJlcGx5Eg8KB3Jvb21faWQYASAB",
             "KAUiPgoIQ3VzdG9tZXISCgoCSWQYASABKAkSDAoEbmFtZRgCIAEoCRIYChBj",
-            "b2xvcl9pbl9jb25zb2xlGAMgASgJIpYBCgtDaGF0TWVzc2FnZRITCgtjdXN0",
+            "b2xvcl9pbl9jb25zb2xlGAMgASgJIpcBCgtDaGF0TWVzc2FnZRITCgtjdXN0",
             "b21lcl9pZBgBIAEoCRIPCgdtZXNzYWdlGAIgASgJEg0KBWNvbG9yGAMgASgJ",
-            "EhUKDWN1c3RvbWVyX25hbWUYBSABKAkSFQoNY3VzdG9tZXJfZGVzdBgGIAEo",
-            "CRITCgttZXNzYWdlVGltZRgHIAEoCRIPCgdyb29tX2lkGAQgASgFMrwBCg9D",
-            "dXN0b21lclNlcnZpY2USVgoQSm9pbkN1c3RvbWVyQ2hhdBIhLkN1c3RvbWVy",
-            "R3JwYy5Kb2luQ3VzdG9tZXJSZXF1ZXN0Gh8uQ3VzdG9tZXJHcnBjLkpvaW5D",
-            "dXN0b21lclJlcGx5ElEKFVNlbmRNZXNzYWdlVG9DaGF0Um9vbRIZLkN1c3Rv",
-            "bWVyR3JwYy5DaGF0TWVzc2FnZRoZLkN1c3RvbWVyR3JwYy5DaGF0TWVzc2Fn",
-            "ZSgBMAFiBnByb3RvMw=="));
+            "EhUKDWN1c3RvbWVyX25hbWUYBCABKAkSGAoQZnVuY3Rpb25fcHJvY2VzcxgF",
+            "IAEoCRIRCglyZXNwdWVzdGEYByABKAkSDwoHcm9vbV9pZBgGIAEoBTK8AQoP",
+            "Q3VzdG9tZXJTZXJ2aWNlElYKEEpvaW5DdXN0b21lckNoYXQSIS5DdXN0b21l",
+            "ckdycGMuSm9pbkN1c3RvbWVyUmVxdWVzdBofLkN1c3RvbWVyR3JwYy5Kb2lu",
+            "Q3VzdG9tZXJSZXBseRJRChVTZW5kTWVzc2FnZVRvQ2hhdFJvb20SGS5DdXN0",
+            "b21lckdycGMuQ2hhdE1lc3NhZ2UaGS5DdXN0b21lckdycGMuQ2hhdE1lc3Nh",
+            "Z2UoATABYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::CustomerGrpc.JoinCustomerRequest), global::CustomerGrpc.JoinCustomerRequest.Parser, new[]{ "Customer" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::CustomerGrpc.JoinCustomerReply), global::CustomerGrpc.JoinCustomerReply.Parser, new[]{ "RoomId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::CustomerGrpc.Customer), global::CustomerGrpc.Customer.Parser, new[]{ "Id", "Name", "ColorInConsole" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::CustomerGrpc.ChatMessage), global::CustomerGrpc.ChatMessage.Parser, new[]{ "CustomerId", "Message", "Color", "CustomerName", "CustomerDest", "MessageTime", "RoomId" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::CustomerGrpc.ChatMessage), global::CustomerGrpc.ChatMessage.Parser, new[]{ "CustomerId", "Message", "Color", "CustomerName", "FunctionProcess", "Respuesta", "RoomId" }, null, null, null, null)
           }));
     }
     #endregion
@@ -680,8 +680,8 @@ namespace CustomerGrpc {
       message_ = other.message_;
       color_ = other.color_;
       customerName_ = other.customerName_;
-      customerDest_ = other.customerDest_;
-      messageTime_ = other.messageTime_;
+      functionProcess_ = other.functionProcess_;
+      respuesta_ = other.respuesta_;
       roomId_ = other.roomId_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -725,7 +725,7 @@ namespace CustomerGrpc {
     }
 
     /// <summary>Field number for the "customer_name" field.</summary>
-    public const int CustomerNameFieldNumber = 5;
+    public const int CustomerNameFieldNumber = 4;
     private string customerName_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string CustomerName {
@@ -735,30 +735,30 @@ namespace CustomerGrpc {
       }
     }
 
-    /// <summary>Field number for the "customer_dest" field.</summary>
-    public const int CustomerDestFieldNumber = 6;
-    private string customerDest_ = "";
+    /// <summary>Field number for the "function_process" field.</summary>
+    public const int FunctionProcessFieldNumber = 5;
+    private string functionProcess_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string CustomerDest {
-      get { return customerDest_; }
+    public string FunctionProcess {
+      get { return functionProcess_; }
       set {
-        customerDest_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+        functionProcess_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
-    /// <summary>Field number for the "messageTime" field.</summary>
-    public const int MessageTimeFieldNumber = 7;
-    private string messageTime_ = "";
+    /// <summary>Field number for the "respuesta" field.</summary>
+    public const int RespuestaFieldNumber = 7;
+    private string respuesta_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string MessageTime {
-      get { return messageTime_; }
+    public string Respuesta {
+      get { return respuesta_; }
       set {
-        messageTime_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+        respuesta_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
     /// <summary>Field number for the "room_id" field.</summary>
-    public const int RoomIdFieldNumber = 4;
+    public const int RoomIdFieldNumber = 6;
     private int roomId_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int RoomId {
@@ -785,8 +785,8 @@ namespace CustomerGrpc {
       if (Message != other.Message) return false;
       if (Color != other.Color) return false;
       if (CustomerName != other.CustomerName) return false;
-      if (CustomerDest != other.CustomerDest) return false;
-      if (MessageTime != other.MessageTime) return false;
+      if (FunctionProcess != other.FunctionProcess) return false;
+      if (Respuesta != other.Respuesta) return false;
       if (RoomId != other.RoomId) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -798,8 +798,8 @@ namespace CustomerGrpc {
       if (Message.Length != 0) hash ^= Message.GetHashCode();
       if (Color.Length != 0) hash ^= Color.GetHashCode();
       if (CustomerName.Length != 0) hash ^= CustomerName.GetHashCode();
-      if (CustomerDest.Length != 0) hash ^= CustomerDest.GetHashCode();
-      if (MessageTime.Length != 0) hash ^= MessageTime.GetHashCode();
+      if (FunctionProcess.Length != 0) hash ^= FunctionProcess.GetHashCode();
+      if (Respuesta.Length != 0) hash ^= Respuesta.GetHashCode();
       if (RoomId != 0) hash ^= RoomId.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -829,21 +829,21 @@ namespace CustomerGrpc {
         output.WriteRawTag(26);
         output.WriteString(Color);
       }
-      if (RoomId != 0) {
-        output.WriteRawTag(32);
-        output.WriteInt32(RoomId);
-      }
       if (CustomerName.Length != 0) {
-        output.WriteRawTag(42);
+        output.WriteRawTag(34);
         output.WriteString(CustomerName);
       }
-      if (CustomerDest.Length != 0) {
-        output.WriteRawTag(50);
-        output.WriteString(CustomerDest);
+      if (FunctionProcess.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteString(FunctionProcess);
       }
-      if (MessageTime.Length != 0) {
+      if (RoomId != 0) {
+        output.WriteRawTag(48);
+        output.WriteInt32(RoomId);
+      }
+      if (Respuesta.Length != 0) {
         output.WriteRawTag(58);
-        output.WriteString(MessageTime);
+        output.WriteString(Respuesta);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -866,21 +866,21 @@ namespace CustomerGrpc {
         output.WriteRawTag(26);
         output.WriteString(Color);
       }
-      if (RoomId != 0) {
-        output.WriteRawTag(32);
-        output.WriteInt32(RoomId);
-      }
       if (CustomerName.Length != 0) {
-        output.WriteRawTag(42);
+        output.WriteRawTag(34);
         output.WriteString(CustomerName);
       }
-      if (CustomerDest.Length != 0) {
-        output.WriteRawTag(50);
-        output.WriteString(CustomerDest);
+      if (FunctionProcess.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteString(FunctionProcess);
       }
-      if (MessageTime.Length != 0) {
+      if (RoomId != 0) {
+        output.WriteRawTag(48);
+        output.WriteInt32(RoomId);
+      }
+      if (Respuesta.Length != 0) {
         output.WriteRawTag(58);
-        output.WriteString(MessageTime);
+        output.WriteString(Respuesta);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -903,11 +903,11 @@ namespace CustomerGrpc {
       if (CustomerName.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(CustomerName);
       }
-      if (CustomerDest.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(CustomerDest);
+      if (FunctionProcess.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(FunctionProcess);
       }
-      if (MessageTime.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(MessageTime);
+      if (Respuesta.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Respuesta);
       }
       if (RoomId != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(RoomId);
@@ -935,11 +935,11 @@ namespace CustomerGrpc {
       if (other.CustomerName.Length != 0) {
         CustomerName = other.CustomerName;
       }
-      if (other.CustomerDest.Length != 0) {
-        CustomerDest = other.CustomerDest;
+      if (other.FunctionProcess.Length != 0) {
+        FunctionProcess = other.FunctionProcess;
       }
-      if (other.MessageTime.Length != 0) {
-        MessageTime = other.MessageTime;
+      if (other.Respuesta.Length != 0) {
+        Respuesta = other.Respuesta;
       }
       if (other.RoomId != 0) {
         RoomId = other.RoomId;
@@ -970,20 +970,20 @@ namespace CustomerGrpc {
             Color = input.ReadString();
             break;
           }
-          case 32: {
-            RoomId = input.ReadInt32();
-            break;
-          }
-          case 42: {
+          case 34: {
             CustomerName = input.ReadString();
             break;
           }
-          case 50: {
-            CustomerDest = input.ReadString();
+          case 42: {
+            FunctionProcess = input.ReadString();
+            break;
+          }
+          case 48: {
+            RoomId = input.ReadInt32();
             break;
           }
           case 58: {
-            MessageTime = input.ReadString();
+            Respuesta = input.ReadString();
             break;
           }
         }
@@ -1012,20 +1012,20 @@ namespace CustomerGrpc {
             Color = input.ReadString();
             break;
           }
-          case 32: {
-            RoomId = input.ReadInt32();
-            break;
-          }
-          case 42: {
+          case 34: {
             CustomerName = input.ReadString();
             break;
           }
-          case 50: {
-            CustomerDest = input.ReadString();
+          case 42: {
+            FunctionProcess = input.ReadString();
+            break;
+          }
+          case 48: {
+            RoomId = input.ReadInt32();
             break;
           }
           case 58: {
-            MessageTime = input.ReadString();
+            Respuesta = input.ReadString();
             break;
           }
         }
